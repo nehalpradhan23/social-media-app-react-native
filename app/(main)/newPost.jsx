@@ -20,6 +20,9 @@ import Icon from "@/assets/icons";
 import Button from "@/components/Button";
 import * as ImagePicker from "expo-image-picker";
 import { getSupabaseFileUrl } from "@/services/imageService";
+import { Video } from "expo-av";
+import { Alert } from "react-native";
+import { createOrUpdatePost } from "@/services/postService";
 
 const NewPost = () => {
   const { user } = useAuth();
@@ -65,7 +68,7 @@ const NewPost = () => {
       return file.type;
     }
     // check image or video for remote files
-    if (file.includes("postImage")) {
+    if (file.includes("postImages")) {
       return "image";
     }
     return "video";
@@ -80,7 +83,32 @@ const NewPost = () => {
     return getSupabaseFileUrl(file)?.uri;
   };
   // =============================================
-  const onSubmit = async (isImage) => {};
+  const onSubmit = async () => {
+    if (!bodyRef.current && !file) {
+      Alert.alert("Post", "Post cannot be empty");
+      return;
+    }
+
+    let data = {
+      file,
+      body: bodyRef.current,
+      userId: user?.id,
+    };
+
+    // create post
+
+    setLoading(true);
+    let res = await createOrUpdatePost(data);
+    setLoading(false);
+    if (res.success) {
+      setFile(null);
+      bodyRef.current = "";
+      editorRef.current?.setContentHTML("");
+      router.back();
+    } else {
+      Alert.alert("Post", res.msg);
+    }
+  };
   // =============================================
   return (
     <ScreenWrapper bg="white">
@@ -111,7 +139,15 @@ const NewPost = () => {
           {file && (
             <View style={styles.file}>
               {getFileType(file) == "video" ? (
-                <></>
+                <Video
+                  style={{ flex: 1 }}
+                  source={{
+                    uri: getFileUri(file),
+                  }}
+                  useNativeControls
+                  resizeMode="cover"
+                  isLooping
+                />
               ) : (
                 <Image
                   source={{ uri: getFileUri(file) }}
@@ -138,6 +174,7 @@ const NewPost = () => {
             </View>
           </View>
         </ScrollView>
+        {/* =================================================== */}
         <Button
           buttonStyle={{ height: hp(6.2) }}
           title="Post"

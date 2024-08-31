@@ -61,6 +61,7 @@ export default RichTextEditor;
 
 const styles = StyleSheet.create({
   richBar: {
+    // paddingBottom: 50,
     borderTopRightRadius: theme.radius.xl,
     borderTopLeftRadius: theme.radius.xl,
     backgroundColor: theme.colors.gray,
@@ -70,6 +71,8 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   rich: {
+    // marginTop: 50,
+    // paddingTop: 50,
     minHeight: 200,
     flex: 1,
     borderWidth: 1.5,
