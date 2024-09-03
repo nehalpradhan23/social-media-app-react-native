@@ -29,6 +29,7 @@ const Home = () => {
   const router = useRouter();
 
   const [posts, setPosts] = useState([]);
+  const [hasMore, setHasMore] = useState(true);
 
   // real time changes/ get newly created post ================================
   const handlePostEvent = async (payload) => {
@@ -50,7 +51,7 @@ const Home = () => {
         handlePostEvent
       )
       .subscribe();
-    getPosts();
+    // getPosts();
 
     return () => {
       supabase.removeChannel(postChannel);
@@ -58,10 +59,12 @@ const Home = () => {
   }, []);
 
   const getPosts = async () => {
-    limit = limit + 10;
+    if (!hasMore) return null;
+    limit = limit + 4;
     let res = await fetchPosts(limit);
 
     if (res.success) {
+      if (posts.length == res.data.length) setHasMore(false);
       setPosts(res.data);
     }
   };
@@ -116,10 +119,20 @@ const Home = () => {
           renderItem={({ item }) => (
             <PostCard item={item} currentUser={user} router={router} />
           )}
+          onEndReached={() => {
+            getPosts();
+          }}
+          onEndReachedThreshold={0}
           ListFooterComponent={
-            <View style={{ marginVertical: posts.length == 0 ? 200 : 30 }}>
-              <Loading />
-            </View>
+            hasMore ? (
+              <View style={{ marginVertical: posts.length == 0 ? 200 : 30 }}>
+                <Loading />
+              </View>
+            ) : (
+              <View style={{ marginVertical: 30 }}>
+                <Text style={styles.noPosts}>No more posts</Text>
+              </View>
+            )
           }
         />
       </View>
