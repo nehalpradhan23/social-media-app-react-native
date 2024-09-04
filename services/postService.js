@@ -93,3 +93,47 @@ export const removePostLike = async (postId, userId) => {
     return { success: false, msg: "Failed to unlike post" };
   }
 };
+
+export const fetchPostDetails = async (postId) => {
+  try {
+    const { data, error } = await supabase
+      .from("posts")
+      .select(
+        `
+        *,
+        user: users (id, name, image),
+        postLikes (*)
+        `
+      )
+      .eq("id", postId)
+      .single();
+
+    if (error) {
+      console.log("fetch post details error", error);
+      return { success: false, msg: "Failed to fetch post details" };
+    }
+    return { success: true, data: data };
+  } catch (error) {
+    console.log("fetch post details error", error);
+    return { success: false, msg: "Failed to fetch post details" };
+  }
+};
+
+export const createComment = async (comment) => {
+  try {
+    const { data, error } = await supabase
+      .from("comments")
+      .insert(comment)
+      .select()
+      .single();
+
+    if (error) {
+      console.log("comment error", error);
+      return { success: false, msg: "Failed to create comment" };
+    }
+    return { success: true, data: data };
+  } catch (error) {
+    console.log("comment error", error);
+    return { success: false, msg: "Failed to create comment" };
+  }
+};

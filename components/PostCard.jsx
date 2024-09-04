@@ -36,7 +36,13 @@ const tagsStyles = {
   },
 };
 
-const PostCard = ({ item, currentUser, router, hasShadow = true }) => {
+const PostCard = ({
+  item,
+  currentUser,
+  router,
+  hasShadow = true,
+  showMoreIcon = true,
+}) => {
   const shadowStyle = {
     shadowOffset: {
       width: 0,
@@ -55,6 +61,7 @@ const PostCard = ({ item, currentUser, router, hasShadow = true }) => {
   }, []);
   // ===============================================================
   const openPostDetails = () => {
+    if (!showMoreIcon) return null;
     router.push({ pathname: "postDetails", params: { postId: item?.id } });
   };
 
@@ -117,14 +124,16 @@ const PostCard = ({ item, currentUser, router, hasShadow = true }) => {
             <Text style={styles.postTime}>{createdAt}</Text>
           </View>
         </View>
-        <TouchableOpacity onPress={openPostDetails}>
-          <Icon
-            name="threeDotsHorizontal"
-            size={hp(3.4)}
-            strokeWidth={3}
-            color={theme.colors.text}
-          />
-        </TouchableOpacity>
+        {showMoreIcon && (
+          <TouchableOpacity onPress={openPostDetails}>
+            <Icon
+              name="threeDotsHorizontal"
+              size={hp(3.4)}
+              strokeWidth={3}
+              color={theme.colors.text}
+            />
+          </TouchableOpacity>
+        )}
       </View>
       {/* post body ================================== */}
       <View style={styles.content}>
