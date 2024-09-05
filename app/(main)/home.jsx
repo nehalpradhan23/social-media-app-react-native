@@ -42,6 +42,7 @@ const Home = () => {
   };
 
   useEffect(() => {
+    // TODO : update real time comment count on home screen
     // for real time changes/ auto update new post =====================================
     let postChannel = supabase
       .channel("posts")

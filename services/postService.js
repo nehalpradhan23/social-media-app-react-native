@@ -39,7 +39,8 @@ export const fetchPosts = async (limit = 10) => {
         `
         *,
         user: users (id, name, image),
-        postLikes (*)
+        postLikes (*),
+        comments (count)
         `
       )
       .order("created_at", { ascending: false })
@@ -102,10 +103,12 @@ export const fetchPostDetails = async (postId) => {
         `
         *,
         user: users (id, name, image),
-        postLikes (*)
+        postLikes (*),
+        comments (*, user: users(id, name, image))
         `
       )
       .eq("id", postId)
+      .order("created_at", { ascending: false, foreignTable: "comments" })
       .single();
 
     if (error) {
@@ -135,5 +138,23 @@ export const createComment = async (comment) => {
   } catch (error) {
     console.log("comment error", error);
     return { success: false, msg: "Failed to create comment" };
+  }
+};
+
+export const removeComment = async (commentId) => {
+  try {
+    const { error } = await supabase
+      .from("comments")
+      .delete()
+      .eq("id", commentId);
+
+    if (error) {
+      console.log("delete comment error", error);
+      return { success: false, msg: "Failed to delete comment" };
+    }
+    return { success: true, data: { commentId } };
+  } catch (error) {
+    console.log("delete comment error", error);
+    return { success: false, msg: "Failed to delete comment" };
   }
 };
