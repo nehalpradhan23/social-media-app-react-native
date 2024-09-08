@@ -24,9 +24,10 @@ import Icon from "@/assets/icons";
 import CommentItem from "@/components/CommentItem";
 import { supabase } from "@/lib/supabase";
 import { getUserData } from "@/services/userService";
+import { createNotification } from "@/services/notificationService";
 
 const PostDetails = () => {
-  const { postId } = useLocalSearchParams();
+  const { postId, commentId } = useLocalSearchParams();
 
   const [post, setPost] = useState(null);
 
@@ -39,7 +40,7 @@ const PostDetails = () => {
   const commentRef = useRef(""); // ref to hold input value
 
   const handleNewComment = async (payload) => {
-    console.log("got new comment:", payload.new);
+    // console.log("got new comment:", payload.new);
     if (payload.new) {
       let newComment = { ...payload.new };
       let res = await getUserData(newComment.userId);
@@ -95,6 +96,15 @@ const PostDetails = () => {
     setLoading(false);
     if (res.success) {
       // send notification
+      if (user.id != post.userId) {
+        let notify = {
+          senderId: user.id,
+          receiverId: post.userId,
+          title: "commented on your post",
+          data: JSON.stringify({ postId: post.id, commentId: res?.data?.id }),
+        };
+        createNotification(notify);
+      }
       inputRef?.current?.clear();
       commentRef.current = "";
     } else {
@@ -199,6 +209,7 @@ const PostDetails = () => {
               key={comment?.id?.toString()}
               canDelete={user.id == comment.userId || useRef.id == post.userId}
               onDelete={onDeleteComment}
+              highlight={comment.id == commentId}
             />
           ))}
           {post?.comments?.length == 0 && (
